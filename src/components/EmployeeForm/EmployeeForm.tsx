@@ -1,13 +1,5 @@
 import { useEffect } from 'react';
-import {
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  DatePicker,
-  Button,
-  Popconfirm,
-} from 'antd';
+import { Modal, Form, Input, InputNumber, DatePicker, Button } from 'antd';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
@@ -65,17 +57,9 @@ const EmployeeForm = ({
       open={visible}
       onCancel={onCancel}
       footer={[
-        <Popconfirm
-          key='back'
-          title={`Вы уверены, что хотите ${
-            initialValues ? UI_FIELDS.cancelEditing : UI_FIELDS.cancelCreating
-          } ?`}
-          onConfirm={onCancel}
-          okText='Да'
-          cancelText='Нет'
-        >
-          <Button>Отмена</Button>
-        </Popconfirm>,
+        <Button key='back' onClick={onCancel}>
+          Отмена
+        </Button>,
         <Button key='submit' type='primary' onClick={handleSubmit(onSubmit)}>
           {initialValues ? UI_FIELDS.confirmSaveEmployee : 'Добавить'}
         </Button>,
@@ -123,7 +107,13 @@ const EmployeeForm = ({
             name={'salary'}
             control={control}
             render={({ field }) => (
-              <InputNumber {...field} style={{ width: '100%' }} />
+              <InputNumber
+                {...field}
+                onChange={(value) =>
+                  field.onChange(value === null ? undefined : value)
+                }
+                style={{ width: '100%' }}
+              />
             )}
           />
         </Form.Item>

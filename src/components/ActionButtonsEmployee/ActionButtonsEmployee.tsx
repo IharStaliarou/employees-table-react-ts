@@ -12,7 +12,7 @@ interface Props {
 
 export const ActionButtonsEmployee = ({ record, onEdit, onDelete }: Props) => {
   return (
-    <Space size='middle'>
+    <Space>
       <Button icon={<EditOutlined />} onClick={() => onEdit(record)}>
         Редактировать
       </Button>

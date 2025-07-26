@@ -8,11 +8,13 @@ import type { IEmployee } from '../../shared/types/employee.interface';
 import type { EmployeeFormData } from '../EmployeeForm/employeeSchema';
 import { getEmployeeColumns } from '../../shared/data/columns';
 import { loadEmployees, saveEmployees } from '../../shared/utils/localStorage';
-
-const { Search } = Input;
+import { MOCK_EMPLOYEES } from '../../shared/data/employees';
 
 export const EmployeesTable = () => {
-  const [data, setData] = useState<IEmployee[]>(() => loadEmployees());
+  const [data, setData] = useState<IEmployee[]>(() => {
+    const savedEmployees = loadEmployees();
+    return savedEmployees.length > 0 ? savedEmployees : MOCK_EMPLOYEES;
+  });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<IEmployee | null>(
     null
@@ -62,8 +64,13 @@ export const EmployeesTable = () => {
     setIsModalVisible(true);
   }, []);
 
-  const handleSearch = (value: string) => {
-    setSearchText(value.toLowerCase());
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value.toLowerCase());
+  };
+
+  const handleCancel = () => {
+    setEditingEmployee(null);
+    setIsModalVisible(false);
   };
 
   const filteredData = useMemo(() => {
@@ -78,8 +85,8 @@ export const EmployeesTable = () => {
   }, [data, searchText]);
 
   const columns = useMemo(
-    () => getEmployeeColumns(showEditModal, handleDelete),
-    [showEditModal, handleDelete]
+    () => getEmployeeColumns(showEditModal, handleDelete, searchText),
+    [showEditModal, handleDelete, searchText]
   );
 
   return (
@@ -102,13 +109,12 @@ export const EmployeesTable = () => {
           Добавить
         </Button>
         <Popover>
-          <Search
+          <Input
             placeholder='Поиск по таблице...'
             allowClear
-            enterButton={<SearchOutlined />}
-            onSearch={handleSearch}
+            onChange={handleSearch}
             style={{ width: 300 }}
-            popover='auto'
+            prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.45)' }} />}
           />
         </Popover>
       </Space>
@@ -125,10 +131,7 @@ export const EmployeesTable = () => {
 
       <EmployeeForm
         visible={isModalVisible}
-        onCancel={() => {
-          setIsModalVisible(false);
-          setEditingEmployee(null);
-        }}
+        onCancel={handleCancel}
         onSubmitEmployee={editingEmployee ? handleEdit : handleAdd}
         initialValues={
           editingEmployee
