@@ -11,7 +11,6 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
-
 import { employeeSchema, type EmployeeFormData } from './employeeSchema';
 import { DATE_FORMAT } from '../../shared/constants';
 import { UI_FIELDS } from '../../shared/constants/fields';
@@ -37,6 +36,7 @@ const EmployeeForm = ({
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
     defaultValues: initialValues || { name: '', date: '', salary: 0 },
+    mode: 'onChange',
   });
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const EmployeeForm = ({
       reset({
         ...initialValues,
         date: initialValues.date
-          ? dayjs(initialValues.date).format(DATE_FORMAT)
+          ? dayjs(initialValues.date, DATE_FORMAT).format(DATE_FORMAT)
           : '',
       });
     } else {
@@ -77,13 +77,13 @@ const EmployeeForm = ({
           <Button>Отмена</Button>
         </Popconfirm>,
         <Button key='submit' type='primary' onClick={handleSubmit(onSubmit)}>
-          {initialValues ? 'Сохранить изменения' : 'Добавить'}
+          {initialValues ? UI_FIELDS.confirmSaveEmployee : 'Добавить'}
         </Button>,
       ]}
     >
       <Form layout='vertical'>
         <Form.Item
-          label='Имя'
+          label={UI_FIELDS.name}
           validateStatus={errors.name ? 'error' : ''}
           help={errors.name?.message}
         >
@@ -96,7 +96,7 @@ const EmployeeForm = ({
           />
         </Form.Item>
         <Form.Item
-          label='Дата'
+          label={UI_FIELDS.date}
           validateStatus={errors.date ? 'error' : ''}
           help={errors.date?.message}
         >
@@ -107,7 +107,7 @@ const EmployeeForm = ({
               <DatePicker
                 placeholder='Выберите дату'
                 format={DATE_FORMAT}
-                value={field.value ? dayjs(field.value) : null}
+                value={field.value ? dayjs(field.value, DATE_FORMAT) : null}
                 onChange={(_, dateString) => field.onChange(dateString)}
                 style={{ width: '100%' }}
               />

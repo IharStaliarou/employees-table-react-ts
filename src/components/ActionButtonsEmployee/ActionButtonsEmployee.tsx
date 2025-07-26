@@ -6,7 +6,7 @@ import { UI_FIELDS } from '../../shared/constants/fields';
 
 interface Props {
   record: IEmployee;
-  onEdit: (vacancy: IEmployee) => void;
+  onEdit: (employee: IEmployee) => void;
   onDelete: (id: string) => void;
 }
 

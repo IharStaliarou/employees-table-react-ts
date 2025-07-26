@@ -6,36 +6,38 @@ import { SortOrderType } from '../types/sort.type';
 import { sortbyName, sortByDate, sortBySalary } from '../utils/sortUtils';
 import { ActionButtonsEmployee } from '../../components/ActionButtonsEmployee/ActionButtonsEmployee';
 import { DATE_FORMAT } from '../constants';
+import { UI_FIELDS } from '../constants/fields';
 
 export const getEmployeeColumns = (
-  onEdit: (vacancy: IEmployee) => void,
+  onEdit: (employee: IEmployee) => void,
   onDelete: (id: string) => void
 ): ColumnType<IEmployee>[] => {
   return [
     {
-      title: 'Имя',
+      title: UI_FIELDS.name,
       dataIndex: 'name',
       key: 'name',
       sorter: sortbyName,
       sortDirections: SortOrderType,
     },
     {
-      title: 'Дата',
+      title: UI_FIELDS.date,
       dataIndex: 'date',
       key: 'date',
-      render: (text: string) => dayjs(text).format(DATE_FORMAT),
+      render: (stringDate: string) =>
+        stringDate ? dayjs(stringDate, DATE_FORMAT).format(DATE_FORMAT) : '',
       sorter: sortByDate,
       sortDirections: SortOrderType,
     },
     {
-      title: 'Заработная плата',
-      dataIndex: 'value',
-      key: 'value',
+      title: UI_FIELDS.salary,
+      dataIndex: 'salary',
+      key: 'salary',
       sorter: sortBySalary,
       sortDirections: SortOrderType,
     },
     {
-      title: 'Действия',
+      title: UI_FIELDS.actions,
       key: 'actions',
       render: (_, record: IEmployee) => (
         <ActionButtonsEmployee
