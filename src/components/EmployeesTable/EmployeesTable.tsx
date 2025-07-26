@@ -1,59 +1,64 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Table, Button, Input, Space, Popover } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
-import dayjs from 'dayjs';
 
 import EmployeeForm from '../EmployeeForm/EmployeeForm';
 import type { IEmployee } from '../../shared/types/employee.interface';
 import type { EmployeeFormData } from '../EmployeeForm/employeeSchema';
 import { getEmployeeColumns } from '../../shared/data/columns';
-import { DATE_FORMAT } from '../../shared/constants';
+import { loadEmployees, saveEmployees } from '../../shared/utils/localStorage';
 
 const { Search } = Input;
 
 export const EmployeesTable = () => {
-  const [data, setData] = useState<IEmployee[]>([]);
+  const [data, setData] = useState<IEmployee[]>(() => loadEmployees());
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingVacancy, setEditingVacancy] = useState<IEmployee | null>(null);
+  const [editingEmployee, setEditingEmployee] = useState<IEmployee | null>(
+    null
+  );
   const [searchText, setSearchText] = useState('');
 
+  useEffect(() => {
+    saveEmployees(data);
+  }, [data]);
+
   const handleAdd = (values: EmployeeFormData) => {
-    const newVacancy: IEmployee = {
+    const newEmployee: IEmployee = {
       id: uuidv4(),
       name: values.name,
-      date: dayjs(values.date).toISOString(),
+      date: values.date,
       salary: values.salary,
     };
-    setData((prev) => [...prev, newVacancy]);
+    setData((prev) => [...prev, newEmployee]);
     setIsModalVisible(false);
   };
 
   const handleEdit = (values: EmployeeFormData) => {
-    if (editingVacancy) {
+    if (editingEmployee) {
       setData(
-        data.map((item) =>
-          item.id === editingVacancy.id
+        data.map((item: IEmployee) =>
+          item.id === editingEmployee.id
             ? {
                 ...item,
                 name: values.name,
-                date: dayjs(values.date).toISOString(),
+                date: values.date,
                 salary: values.salary,
               }
             : item
         )
       );
-      setEditingVacancy(null);
+      setEditingEmployee(null);
       setIsModalVisible(false);
     }
   };
 
   const handleDelete = useCallback((id: string) => {
-    setData((prev) => prev.filter((item) => item.id !== id));
+    setData((prev) => prev.filter((item: IEmployee) => item.id !== id));
   }, []);
 
-  const showEditModal = useCallback((vacancy: IEmployee) => {
-    setEditingVacancy(vacancy);
+  const showEditModal = useCallback((employee: IEmployee) => {
+    setEditingEmployee(employee);
     setIsModalVisible(true);
   }, []);
 
@@ -65,7 +70,7 @@ export const EmployeesTable = () => {
     if (!searchText) {
       return data;
     }
-    return data.filter((item) =>
+    return data.filter((item: IEmployee) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchText)
       )
@@ -90,7 +95,7 @@ export const EmployeesTable = () => {
           type='primary'
           icon={<PlusOutlined />}
           onClick={() => {
-            setEditingVacancy(null);
+            setEditingEmployee(null);
             setIsModalVisible(true);
           }}
         >
@@ -110,7 +115,10 @@ export const EmployeesTable = () => {
 
       <Table
         columns={columns}
-        dataSource={filteredData.map((item) => ({ ...item, key: item.id }))}
+        dataSource={filteredData.map((item: IEmployee) => ({
+          ...item,
+          key: item.id,
+        }))}
         pagination={{ pageSize: 10 }}
         bordered
       />
@@ -119,15 +127,15 @@ export const EmployeesTable = () => {
         visible={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);
-          setEditingVacancy(null);
+          setEditingEmployee(null);
         }}
-        onSubmitEmployee={editingVacancy ? handleEdit : handleAdd}
+        onSubmitEmployee={editingEmployee ? handleEdit : handleAdd}
         initialValues={
-          editingVacancy
+          editingEmployee
             ? {
-                name: editingVacancy.name,
-                date: dayjs(editingVacancy.date).format(DATE_FORMAT),
-                salary: editingVacancy.salary,
+                name: editingEmployee.name,
+                date: editingEmployee.date,
+                salary: editingEmployee.salary,
               }
             : null
         }
